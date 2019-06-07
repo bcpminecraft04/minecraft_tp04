@@ -1,0 +1,161 @@
+
+#include <CoalaMOD.h>
+#pragma comment(lib, "CoalaMOD.lib")
+#include <cmath>
+#define M_PI 3.14159265358979323846
+
+void sphere (BlockID block, int x, int y, int z, double radius);
+void woodsquare (int x, int y, int z, int vertical, int horizontal);
+void branch(int x, int y, int z);
+void trunk(int x, int y, int z);
+void snowcircle(int radius, int x, int y, int z);
+void bench(int x, int y, int z);
+void wheel(int x, int y, int z, int radius);
+void door(int x, int y, int z);
+
+int main() {
+
+	int x, y, z = 0;
+	BlockID glass = createBlock(BLOCK_GLASS);
+
+	scanf_s("%d %d %d", &x, &y, &z);
+
+	sphere(glass, x, y, z, 30);
+	snowcircle(30, x, y, z);
+	trunk(x, y, z);
+	branch(x, y, z);
+	bench(x, y, z);
+	wheel(x - 10, y + 6, z - 15, 5);
+	door(x, y, z);
+}
+	
+	
+
+
+
+void sphere(BlockID block, int x, int y, int z, double radius) { //반구 만드는 함수
+	double radian = M_PI / 180.;
+
+	for (int i = 0; i < 90; i++) {
+		for (int j = 0; j < 360; j++) {
+			double x_ = radius * sin(radian * i) * cos(radian * j);
+			double z_ = radius * sin(radian * i) * sin(radian * j);
+			double y_ = radius * cos(radian * i);
+
+			locateBlock(block, x + x_, y + y_, z + z_);
+		}
+	}
+}
+
+
+void woodsquare (int x, int y, int z, int vertical, int horizontal) {  //직사각형(xz평면) 만드는 함수 (나무)
+
+	for (int j = -vertical; j < vertical; j++) {
+		for (int i = -horizontal; i < horizontal; i++) {
+			BlockID block = createWood(WoodType(1), WoodStrip(0));
+			locateWood(block, x + i, y, z + j);
+		}
+	}
+}
+
+void woodcircle(int radius, int x, int y, int z) {  //속이 채워진 원 만드는 함수(나무)
+	for (int i = -radius; i < radius; i++) {
+		for (int j = -radius; j < radius; j++) {
+			if (i*i + j * j < radius * radius) {
+				BlockID block = createWood(WoodType(1), WoodStrip(0));
+				locateWood(block, x + i, y, z + j);
+			}
+		}
+	}
+}
+
+void wheel(int x, int y, int z, int radius) {	        //쳇바퀴 만드는 함수(나무, 펜스, 나무)
+
+	BlockID wood = createWood(WoodType(1), WoodStrip(0));
+	BlockID leg = createFence(FenceType(1));
+
+	double radian = M_PI / 180.;  
+
+	for (int i = 0; i < 360; i++) {
+		double y_ = radius * cos(radian * i);  
+		double z_ = radius * sin(radian * i); 
+		locateBlock(wood, x, y + y_, z + z_);
+		locateBlock(wood, x - 2, y + y_, z + z_);
+		locateFence(leg, x - 1, y + y_, z + z_);
+	}
+	locateFence(leg, x, y - radius - 1, z);
+	locateFence(leg, x - 1, y - radius - 1, z);
+	
+
+}
+
+void trunk(int x, int y, int z) {  //반구 중심의 나무 몸통 만드는 함수
+	
+	for (int i = 0; i < 17; i++) {
+		woodsquare(x, y + i, z, 2, 2);
+	}
+
+	for (int j = 0; j < 6; j++) {
+		
+		woodcircle(6 - j, x, y + j, z);
+		
+	}
+
+}
+
+void branch(int x, int y, int z) {  //나뭇가지 만드는 함수(눈 올려져 있음)
+
+	for (int i = 0; i < 7; i++) {
+		woodcircle(2, x + i, y + 16 + i, z + i);
+		snowcircle(2, x + i, y + 17 + i, z + i);
+
+		woodcircle(2, x + i, y + 16 + i, z - i);
+		snowcircle(2, x + i, y + 17 + i, z - i);
+
+		woodcircle(2, x - i, y + 16 + i, z - i);
+		snowcircle(2, x - i, y + 17 + i, z - i);
+
+		woodcircle(2, x - i, y + 16 + i, z + i);
+		snowcircle(2, x - i, y + 17 + i, z + i);
+	}
+	
+}
+
+
+void snowcircle(int radius, int x, int y, int z) {  //반구 안쪽 바닥에 눈 깔기
+
+	for (int i = -radius; i < radius; i++) {
+		for (int j = -radius; j < radius; j++) {
+			if (i*i + j * j < radius * radius) {
+				
+				locateSnow(createSnow(2), x + i, y, z + j);
+			}
+		}
+	}
+}
+
+void bench (int x, int y, int z) {  //벤치(의자부분-계단, 다리는 펜스)
+	BlockOrientation orientations[4] = { FACING_EAST, FACING_WEST, FACING_SOUTH, FACING_NORTH };
+
+	for (int i = 0; i < 4; i++) {
+		BlockID chair = createStairs(StairsType(1), 0);
+		BlockID leg = createFence(FenceType(1));
+		locateFence(leg, x + 10, y, z + i + 7);
+		installStairs(chair, x + 10, y + 1, z + i + 7, orientations[1]);
+	}
+}
+
+void door(int x, int y, int z) {  //입구(열린문)
+	BlockOrientation orientations[4] = { FACING_EAST, FACING_WEST, FACING_SOUTH, FACING_NORTH };
+	BlockID door = createDoor(DoorType(2), 1, DoorHinge(1));
+	BlockID glass = createBlock(BLOCK_GLASS);
+	BlockID air = createBlock(BLOCK_AIR);
+	installDoor(door, x + 31, y, z, orientations[0]);
+	locateBlock(glass, x + 31, y, z + 1);
+	locateBlock(glass, x + 31, y + 1, z + 1);
+	locateBlock(glass, x + 31, y, z - 1);
+	locateBlock(glass, x + 31, y + 1, z - 1);
+	locateBlock(glass, x + 31, y + 2, z);
+	locateBlock(air, x + 30, y, z);
+	locateBlock(air, x + 30, y + 1, z);
+}
