@@ -115,17 +115,6 @@ void faucet(int x, int y, int z) {  //본체 위 구조물-수도꼭지 형태(�
 
 }
 
-
-void arraytogame(int* arr[], BlockID block, int x1, int y1, int z1, int x2, int y2, int z2) {
-	for (int i = 0; i < (x1 - x2 == 0) ? abs(y2 - y1) : abs(x2 - x1); i++) {
-		for (int j = 0; j < (x1 - x2 == 0) ? abs(x2 - x1) : abs(y2 - y1); j++) {
-			if (arr[i][j] == 1) {
-				locateBlock(block, x1 + i, y1 + j, z1);
-			}
-		}
-	}
-}
-
 void walls(BlockID block, int x1, int y1, int z1, int x2, int y2, int z2) {
 	int x = (x1 < x2) ? x1 : x2, y = (y1 < y2) ? y1 : y2, z = (z1 < z2) ? z1 : z2;
 	for (int i = 0; i < ((y1 - y2 == 0) ? 1 : abs(y1 - y2)); i++) {
@@ -140,43 +129,12 @@ void walls(BlockID block, int x1, int y1, int z1, int x2, int y2, int z2) {
 	}
 }
 
-void slab_walls(SlabID slab, int x1, int y1, int z1, int x2, int y2, int z2) {
-	int x = (x1 < x2) ? x1 : x2, y = (y1 < y2) ? y1 : y2, z = (z1 < z2) ? z1 : z2;
-	for (int i = 0; i < ((y1 - y2 == 0) ? 1 : abs(y1 - y2)); i++) {
-		for (int j = 0; j <= ((x1 - x2 == 0) ? 1 : abs(x1 - x2)); j++) {
-			locateSlab(slab, x + j, y + i, z1);
-			locateSlab(slab, x + j, y + i, z2);
-		}
-		for (int k = 0; k <= ((z1 - z2 == 0) ? 1 : abs(z1 - z2)); k++) {
-			locateSlab(slab, x1, y + i, z + k);
-			locateSlab(slab, x2, y + i, z + k);
-		}
-	}
-}
-
 void set(BlockID block, int x1, int y1, int z1, int x2, int y2, int z2) {
 	int x = (x1 < x2) ? x1 : x2, y = (y1 < y2) ? y1 : y2, z = (z1 < z2) ? z1 : z2;
 	for (int i = 0; i < ((y1 - y2 == 0) ? 1 : abs(y1 - y2)); i++) {
 		for (int j = 0; j <= ((x1 - x2 == 0) ? 0 : abs(x1 - x2 + 1)); j++) {
 			for (int k = 0; k <= ((z1 - z2 == 0) ? 0 : abs(z1 - z2)); k++) {
 				locateBlock(block, x + j, y + i, z + k);
-			}
-		}
-	}
-}
-
-SlabID slab_height(SlabType type, SlabSize size) {
-	SlabID slab = createSlab(type, size);
-	return slab;
-}
-
-
-void set_slab(SlabID slab, int x1, int y1, int z1, int x2, int y2, int z2) {
-	int x = (x1 < x2) ? x1 : x2, y = (y1 < y2) ? y1 : y2, z = (z1 < z2) ? z1 : z2;
-	for (int i = 0; i < ((y1 - y2 == 0) ? 1 : abs(y1 - y2)); i++) {
-		for (int j = 0; j <= ((x1 - x2 == 0) ? 1 : abs(x1 - x2)); j++) {
-			for (int k = 0; k <= ((z1 - z2 == 0) ? 1 : abs(z1 - z2)); k++) {
-				locateSlab(slab, x + j, y + i, z + k);
 			}
 		}
 	}
@@ -929,7 +887,9 @@ int main()
 	bench(sq_x, sq_y, sq_z);
 	wheel(sq_x - 10, sq_y + 6, sq_z - 15, 5);
 	door(sq_x, sq_y, sq_z);
-
+	
+	int krust_x = 83, krust_y = 4, krust_z = 60;
+	krustykrab(krust_x, krust_y, krust_z);
 
 	straw_house(10, 20, 'd', 140, 4, 15);
 	straw_house(8, 16, 'd', 102, 4, 48);
